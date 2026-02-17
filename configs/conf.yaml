@@ -1,0 +1,25 @@
+log:
+  level: trace
+  path: stderr
+server:
+  address: :8080
+  network: tcp
+  # address: ./socket
+  # network: unix
+service:
+  templates_path: /home/ulibaysya/projects/krona/web/tmpl
+  static:
+    serve: true
+    path: /home/ulibaysya/projects/krona/web/static
+  admin_panel:
+    enabled: false
+
+storage:
+  method: rdbms
+  rdbms:
+    engine: "postgres"
+    # connstr: "dbname=schooljournal_db user=schooljournal"
+    connstr: "dbname=kronadb user=krona"
+  cache:
+    engine: "valkey"
+    connstr: "127.0.0.1:6379"

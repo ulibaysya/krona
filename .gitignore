@@ -1,0 +1,7 @@
+krona
+tests/
+
+sql/sqlc.yaml
+sql/postgres
+
+tmp/

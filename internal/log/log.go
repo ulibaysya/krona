@@ -26,7 +26,7 @@ func New(cfg config.Log) (Logger, error) {
 		logger.writer = os.Stderr
 	default:
 		var err error
-		logger.writer, err = os.OpenFile(cfg.Path, os.O_WRONLY | os.O_APPEND | os.O_CREATE, 0644)
+		logger.writer, err = os.OpenFile(cfg.Path, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
 		if err != nil {
 			return Logger{}, fmt.Errorf("%s: %w", f, err)
 		}

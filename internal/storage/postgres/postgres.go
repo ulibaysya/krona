@@ -54,4 +54,3 @@ func (db postgres) GetProductByID(id int32) types.Product {
 func (db postgres) GetProductByName(name string) types.Product {
 	return types.Product{}
 }
-

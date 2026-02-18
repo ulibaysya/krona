@@ -41,4 +41,3 @@ func (db cachebased) GetProductByID(id int32) types.Product {
 func (db cachebased) GetProductByName(name string) types.Product {
 	return types.Product{}
 }
-

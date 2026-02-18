@@ -36,14 +36,14 @@ func New(cfg config.Service, log log.Logger, strg storage.Storage) (Service, err
 		tmpl     *template.Template
 	}{
 		{
-			path: "GET /",
-			handler: handlers.GetRoot,
+			path:     "GET /",
+			handler:  handlers.GetRoot,
 			tmplFile: "root.tmpl",
 		},
 		{
-			path: "GET /catalogs",
-			aliases: []string{"GET /catalog"},
-			handler: handlers.GetCatalogs,
+			path:     "GET /catalogs",
+			aliases:  []string{"GET /catalog"},
+			handler:  handlers.GetCatalogs,
 			tmplFile: "catalogs.tmpl",
 		},
 		{
@@ -51,7 +51,7 @@ func New(cfg config.Service, log log.Logger, strg storage.Storage) (Service, err
 			aliases: []string{
 				"GET /catalog/{catalogsID}",
 			},
-			handler: handlers.GetCatalogsID,
+			handler:  handlers.GetCatalogsID,
 			tmplFile: "catalog.tmpl",
 		},
 		{
@@ -59,7 +59,7 @@ func New(cfg config.Service, log log.Logger, strg storage.Storage) (Service, err
 			aliases: []string{
 				"GET /catalog/{catalogsID}/{productID}",
 			},
-			handler: handlers.GetProductID,
+			handler:  handlers.GetProductID,
 			tmplFile: "product.tmpl",
 		},
 	}

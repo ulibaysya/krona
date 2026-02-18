@@ -8,8 +8,8 @@ import (
 )
 
 type Config struct {
-	Log    `yaml:"log"`
-	Server `yaml:"server"`
+	Log     `yaml:"log"`
+	Server  `yaml:"server"`
 	Storage `yaml:"storage"`
 	Service `yaml:"service"`
 }

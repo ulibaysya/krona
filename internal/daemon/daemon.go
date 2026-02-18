@@ -11,11 +11,11 @@ import (
 )
 
 type Daemon struct {
-	cfg config.Config
+	cfg    config.Config
 	logger log.Logger
-	strg storage.Storage
-	srvc service.Service
-	serv server.Server
+	strg   storage.Storage
+	srvc   service.Service
+	serv   server.Server
 }
 
 func New(cfgPath string) (Daemon, error) {
@@ -59,7 +59,7 @@ func (d Daemon) Run() error {
 	if err != nil {
 		return fmt.Errorf("%s: %w", f, err)
 	}
-	
+
 	return nil
 }
 

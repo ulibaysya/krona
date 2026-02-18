@@ -7,9 +7,9 @@ type Log struct {
 
 type Service struct {
 	TemplatesPath string `yaml:"templates_path"`
-	Static struct {
-		Serve bool `yaml:"serve"`
-		Path string `yaml:"path"`
+	Static        struct {
+		Serve bool   `yaml:"serve"`
+		Path  string `yaml:"path"`
 	} `yaml:"static"`
 	AdminPanel struct {
 		Enabled bool `yaml:"enabled"`
@@ -24,8 +24,8 @@ type Server struct {
 
 type Storage struct {
 	Method string `yaml:"method"`
-	Cache Cache `yaml:"cache"`
-	RDBMS RDBMS `yaml:"rdbms"`
+	Cache  Cache  `yaml:"cache"`
+	RDBMS  RDBMS  `yaml:"rdbms"`
 }
 
 type RDBMS struct {

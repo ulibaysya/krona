@@ -11,7 +11,7 @@ import (
 
 type Server struct {
 	addr, net string
-	serv *http.Server
+	serv      *http.Server
 }
 
 func New(cfg config.Server, srvc service.Service) (Server, error) {

@@ -88,7 +88,7 @@ func newRDBMS(cfg config.Storage) (storage.Storage, error) {
 func newCache(cfg config.Storage) (storage.Storage, error) {
 	switch cfg.Cache.Engine {
 	// case "valkey":
-		// return postgres.New(cfg.RDBMS)
+	// return postgres.New(cfg.RDBMS)
 	default:
 		return nil, fmt.Errorf(`cache is not yet implemented. use "rdbms" method`)
 	}

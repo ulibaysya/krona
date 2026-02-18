@@ -7,7 +7,7 @@ server:
   # address: ./socket
   # network: unix
 service:
-  templates_path: /home/ulibaysya/projects/krona/web/tmpl
+  templates_path: /home/ulibaysya/projects/krona/web/templates
   static:
     serve: true
     path: /home/ulibaysya/projects/krona/web/static

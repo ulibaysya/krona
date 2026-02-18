@@ -1,11 +1,9 @@
 package service
 
 import (
-	"errors"
 	"fmt"
 	"html/template"
 	"net/http"
-	"os"
 	"path/filepath"
 
 	"github.com/go-chi/chi/v5"
@@ -17,60 +15,74 @@ import (
 )
 
 type Service struct {
-	mux  *chi.Mux
+	mux *chi.Mux
 }
 
 func New(cfg config.Service, log log.Logger, strg storage.Storage) (Service, error) {
 	const f = "github.com/ulibaysya/krona/internal/daemon/service.New"
-	//
-	// const (
-	// 	root       = "/"
-	// 	catalogs   = "/catalogs"
-	// 	catalogsID = "/catalogs/{catalogsID}"
-	// )
-	// templateFiles := []string{
-	// 	"index.tmpl",
-	// 	"shop.tmpl",
-	// }
-	// pagesTmpl := make(map[string]*template.Template, len(templateFiles))
-	// for _, i := range templateFiles {
-	// 	base := *baseTmpl
-	// 	t, err := base.ParseFiles(filepath.Join(cfg.TemplatesPath, i))
-	// 	if err != nil {
-	// 		return Service{}, fmt.Errorf("%s: %w", f, err)
-	// 	}
-	// 	pagesTmpl[i] = t
-	// 	fmt.Println(i, pagesTmpl)
-	// }
-	//
-	templates, err := initTemplates(cfg.TemplatesPath)
+
+	baseTemplate, err := template.ParseGlob(filepath.Join(cfg.TemplatesPath, "base/*"))
 	if err != nil {
 		return Service{}, fmt.Errorf("%s: %w", f, err)
 	}
 
-	obj := []struct {
-		path string
-		fn   func(strg storage.Storage, tmpl *template.Template) http.HandlerFunc
+	mux := chi.NewMux()
+
+	objects := []struct {
+		path     string
+		aliases  []string
+		handler  func(strg storage.Storage, tmpl *template.Template) http.HandlerFunc
+		tmplFile string
+		tmpl     *template.Template
 	}{
-		{"GET /", handlers.GetRoot},
-		{"GET /catalogs", handlers.GetCatalogs},
-		{"GET /catalogs/{catalogsID}", handlers.GetCatalogsID},
+		{
+			path: "GET /",
+			handler: handlers.GetRoot,
+			tmplFile: "root.tmpl",
+		},
+		{
+			path: "GET /catalogs",
+			aliases: []string{"GET /catalog"},
+			handler: handlers.GetCatalogs,
+			tmplFile: "catalogs.tmpl",
+		},
+		{
+			path: "GET /catalogs/{catalogsID}",
+			aliases: []string{
+				"GET /catalog/{catalogsID}",
+			},
+			handler: handlers.GetCatalogsID,
+			tmplFile: "catalog.tmpl",
+		},
+		{
+			path: "GET /catalogs/{catalogsID}/{productID}",
+			aliases: []string{
+				"GET /catalog/{catalogsID}/{productID}",
+			},
+			handler: handlers.GetProductID,
+			tmplFile: "product.tmpl",
+		},
 	}
 
-	mux := chi.NewMux()
+	for _, obj := range objects {
+		c, err := baseTemplate.Clone()
+		if err != nil {
+			return Service{}, fmt.Errorf("%s: %w", f, err)
+		}
+		_, err = c.ParseFiles(filepath.Join(cfg.TemplatesPath, "pages", obj.tmplFile))
+		if err != nil {
+			return Service{}, fmt.Errorf("%s: %w", f, err)
+		}
+
+		mux.HandleFunc(obj.path, obj.handler(strg, c))
+		for _, alias := range obj.aliases {
+			mux.HandleFunc(alias, obj.handler(strg, c))
+		}
+	}
 
 	if cfg.Static.Serve {
 		h := http.FileServer(http.Dir(cfg.Static.Path))
 		mux.Handle("/*", h)
-	}
-
-	for _, i := range obj {
-		tmpl, ok := templates[i.path];
-		if !ok {
-			fmt.Printf("%v: path has nil template, skip\n", i.path)
-			continue
-		}
-		mux.HandleFunc(i.path, i.fn(strg, tmpl))
 	}
 
 	return Service{mux: mux}, nil
@@ -78,47 +90,4 @@ func New(cfg config.Service, log log.Logger, strg storage.Storage) (Service, err
 
 func (s Service) GetMux() chi.Mux {
 	return *s.mux
-}
-
-// Path: "GET /"
-
-// Templates:
-// base.tmpl
-// root.tmpl
-func initTemplates(dir string) (map[string]*template.Template, error) {
-
-	if dir == "" {
-		return nil, errors.New("template path isn't provided")
-	}
-	fmt.Println(dir)
-
-	// baseFiles := []string{
-	// 	filepath.Join(dir, "base.tmpl"),
-	// 	filepath.Join(dir, "header.tmpl"),
-	// 	filepath.Join(dir, "footer.tmpl"),
-	// 	filepath.Join(dir, "js.tmpl"),
-	// 	filepath.Join(dir, "right-area.tmpl"),
-	// 	filepath.Join(dir, "index.tmpl"),
-	// }
-	// fmt.Println(baseFiles)
-	// baseTmpl, err := template.ParseFiles(baseFiles...)
-
-	baseTmpl, err := template.ParseGlob(filepath.Join(dir, "*"))
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println("executing template...")
-	baseTmpl.Execute(os.Stdout, nil)
-	fmt.Println("...executing template")
-
-	templates := make(map[string]*template.Template, 5)
-	templates["GET /"] = baseTmpl
-
-	// files := map[string]string{
-	// 	"GET /":                                  "root.tmpl",
-	// 	"GET /catalogs":                          "catalogs.tmpl",
-	// 	"GET /catalogs/{catalogsID}":             "products.tmpl",
-	// 	"GET /catalogs/{catalogsID}/{productID}": "product.tmpl",
-	// }
-	return templates, nil
 }

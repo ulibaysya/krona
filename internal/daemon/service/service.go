@@ -21,7 +21,13 @@ type Service struct {
 func New(cfg config.Service, log log.Logger, strg storage.Storage) (Service, error) {
 	const f = "github.com/ulibaysya/krona/internal/daemon/service.New"
 
-	baseTemplate, err := template.ParseGlob(filepath.Join(cfg.TemplatesPath, "base/*"))
+	baseTemplates := []string{
+		filepath.Join(cfg.TemplatesPath, "base.tmpl"),
+		filepath.Join(cfg.TemplatesPath, "head.tmpl"),
+		filepath.Join(cfg.TemplatesPath, "header.tmpl"),
+		filepath.Join(cfg.TemplatesPath, "footer.tmpl"),
+	}
+	baseTemplate, err := template.ParseFiles(baseTemplates...)
 	if err != nil {
 		return Service{}, fmt.Errorf("%s: %w", f, err)
 	}
@@ -69,7 +75,7 @@ func New(cfg config.Service, log log.Logger, strg storage.Storage) (Service, err
 		if err != nil {
 			return Service{}, fmt.Errorf("%s: %w", f, err)
 		}
-		_, err = c.ParseFiles(filepath.Join(cfg.TemplatesPath, "pages", obj.tmplFile))
+		_, err = c.ParseFiles(filepath.Join(cfg.TemplatesPath, obj.tmplFile))
 		if err != nil {
 			return Service{}, fmt.Errorf("%s: %w", f, err)
 		}

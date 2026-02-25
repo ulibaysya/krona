@@ -1,0 +1,25 @@
+{{define "main"}}
+
+<!-- Banner section start -->
+<h1>Баннеры</h1>
+{{range .Banners}}
+<p>
+    {{if .RedirectURL}}
+    <a href="{{.RedirectURL}}">
+        <img src="/img/banners/{{.Img}}" width="1200" height="600">
+    </a>
+    {{else}}
+    <img src="/img/banners/{{.Img}}" width="1200" height="600">
+    {{end}}
+</p>
+{{end}}
+<h1>Коней баннеров</h1>
+<!-- Banner section end -->
+
+<!-- Catalogs section start -->
+<!-- Catalogs section end -->
+<!-- Products section start -->
+<!-- Products section end -->
+<!-- Reviews section start -->
+<!-- Reviews section end -->
+{{end}}

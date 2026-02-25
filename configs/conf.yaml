@@ -4,13 +4,13 @@ log:
 server:
   address: :8080
   network: tcp
-  # address: ./socket
+  # address: ./krona.socket
   # network: unix
 service:
   templates_path: /home/ulibaysya/projects/krona/web/templates
   static:
     serve: true
-    path: /home/ulibaysya/projects/krona/web/static
+    path: /home/ulibaysya/projects/krona/tests/static
   admin_panel:
     enabled: false
 
@@ -18,7 +18,6 @@ storage:
   method: rdbms
   rdbms:
     engine: "postgres"
-    # connstr: "dbname=schooljournal_db user=schooljournal"
     connstr: "dbname=kronadb user=krona"
   cache:
     engine: "valkey"

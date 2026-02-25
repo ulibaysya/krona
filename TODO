@@ -1,1 +1,11 @@
-1. Add command to validate config
+- Add command to validate config
+- Add service to convert docx/odt format to html (or from any conventient to ordinary people format)
+- Add descriptions to errors(failed to connect to db, failed to parse templates, failes to start listening, etc)
+- Add redirect service
+- Add a display order to banners, catalogs (which banner is first, second, third, etc. The same for catalogs and all other future things)
+- Hide static content list (see http://localhost:8080/img/)
+- Banners: picture with extension (.png, .gif, .jpeg, .webp - anthing)
+
+- Admin panel(add banner)
+
+- Middleware to process header?

@@ -1,8 +1,10 @@
 package types
 
 type Catalog struct {
-	ID           int32
-	Name, RuName string
+	ID     int64
+	Alias  string
+	Img    string
+	RuName string
 }
 
 type CatalogParameter struct {
@@ -15,4 +17,11 @@ type CatalogParameter struct {
 type Product struct {
 	ID           int32
 	Name, RuName string
+}
+
+type Banner struct {
+	ID          int64
+	Alias       string
+	Img         string
+	RedirectURL string
 }

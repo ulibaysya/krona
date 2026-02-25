@@ -7,8 +7,12 @@ type Storage interface {
 }
 
 type Getter interface {
-	GetCatalog(id int32) (types.Catalog, error)
-	GetCatalogParameter(id int32) types.CatalogParameter
-	GetProductByID(id int32) types.Product
+	GetCatalog(id int64) (types.Catalog, error)
+
+	GetCatalogs() ([]types.Catalog, error)
+	GetBanners() ([]types.Banner, error)
+
+	GetCatalogParameter(id int64) types.CatalogParameter
+	GetProductByID(id int64) types.Product
 	GetProductByName(name string) types.Product
 }

@@ -2,11 +2,13 @@ CREATE TABLE IF NOT EXISTS catalogs(
     id BIGSERIAL PRIMARY KEY,
     alias TEXT UNIQUE NOT NULL,
     img TEXT UNIQUE NOT NULL,
-    ru_name TEXT UNIQUE NOT NULL
+    ru_name TEXT UNIQUE NOT NULL,
+    addition_date TIMESTAMPTZ DEFAULT now()
 );
 CREATE TABLE IF NOT EXISTS banners(
     id BIGSERIAL PRIMARY KEY,
     alias TEXT UNIQUE NOT NULL,
     img TEXT UNIQUE NOT NULL,
-    redirect_url TEXT
+    redirect_url TEXT,
+    addition_date TIMESTAMPTZ DEFAULT now()
 );

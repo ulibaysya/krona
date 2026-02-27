@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	// "github.com/jackc/pgx/v5/pgtype"
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype/zeronull"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/ulibaysya/krona/internal/config"
 	"github.com/ulibaysya/krona/internal/storage/types"
@@ -16,55 +16,62 @@ type postgres struct {
 }
 
 func New(cfg config.RDBMS) (postgres, error) {
+	const f = "internal/storage/postgres.New"
+
 	pool, err := pgxpool.New(context.Background(), cfg.Connstr)
 	if err != nil {
-		return postgres{}, err
+		return postgres{}, fmt.Errorf("%s: %w", f, err)
 	}
 
 	if err := pool.Ping(context.Background()); err != nil {
-		return postgres{}, err
+		return postgres{}, fmt.Errorf("%s: %w", f, err)
 	}
 
 	return postgres{pool: pool}, nil
 }
 
+func (db postgres) InsertCatalog(catalog types.Catalog) (types.Catalog, error) {
+	const f = "internal/storage/postgres.InsertCatalog"
+
+	const sql = "INSERT INTO catalogs(alias, img, ru_name) VALUES ($1, $2, $3) RETURNING id, addition_date;"
+
+	if err := db.pool.QueryRow(context.Background(), sql, catalog.Alias, catalog.Img, catalog.RuName).Scan(&catalog.ID, &catalog.AdditionDate); err != nil {
+		return types.Catalog{}, fmt.Errorf("%s: %w", f, err)
+	}
+
+	return catalog, nil
+}
+
 func (db postgres) GetCatalog(id int64) (types.Catalog, error) {
-	const f = "github.com/ulibaysya/krona/internal/storage/postgres.GetCatalog"
+	const f = "internal/storage/postgres.GetCatalog"
 
-	const sql = "SELECT id, name, ru_name FROM catalogs WHERE id = $1"
+	const sql = "SELECT id, alias, img, ru_name, addition_date FROM catalogs WHERE id = $1;"
 
-	ctlg := types.Catalog{}
-	// pgId := pgtype.Int4{}
-	// if err := db.pool.QueryRow(context.Background(), sql, id).Scan(&ctlg.ID, &ctlg.Name, &ctlg.RuName); err != nil {
-		// return types.Catalog{}, fmt.Errorf("%s: %w", f, err)
-	// }
+	var catalog types.Catalog
+	if err := db.pool.QueryRow(context.Background(), sql, id).Scan(&catalog.ID, &catalog.Alias, &catalog.Img, &catalog.RuName, &catalog.AdditionDate); err != nil {
+		return types.Catalog{}, fmt.Errorf("%s: %w", f, err)
+	}
 
-	// ctlg.ID = pgId.int64
-
-	return ctlg, nil
+	return catalog, nil
 }
 
 func (db postgres) GetCatalogs() ([]types.Catalog, error) {
-	const f = "github.com/ulibaysya/krona/internal/storage/postgres.GetCatalog"
+	const f = "internal/storage/postgres.GetCatalogs"
 
-	rows, err := db.pool.Query(context.Background(), "SELECT id, alias, img, ru_name FROM catalogs")
+	const sql = "SELECT id, alias, img, ru_name, addition_date FROM catalogs;"
+
+	catalogs, err := scanMultiple[types.Catalog](db, sql, nil)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", f, err)
 	}
-	defer rows.Close()
-
-	catalogs := make([]types.Catalog, 0, 20)
-	fmt.Println(rows.RawValues(), len(rows.RawValues()), cap(rows.RawValues()))
-	for rows.Next() {
-		tmp := types.Catalog{}
-		if err := rows.Scan(&tmp.ID, &tmp.Alias, &tmp.Img, &tmp.RuName); err != nil {
-			return nil, fmt.Errorf("%s: %w", f, err)
-		}
-		catalogs = append(catalogs, tmp)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("%s: %w", f, err)
-	}
+	// rows, err := db.pool.Query(context.Background(), sql)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("%s: %w", f, err)
+	// }
+	// catalogs, err := pgx.CollectRows(rows, scanCatalog)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("%s: %w", f, err)
+	// }
 
 	fmt.Println(catalogs)
 
@@ -72,43 +79,75 @@ func (db postgres) GetCatalogs() ([]types.Catalog, error) {
 }
 
 func (db postgres) GetBanners() ([]types.Banner, error) {
-	const f = "github.com/ulibaysya/krona/internal/storage/postgres.GetBanners"
+	const f = "internal/storage/postgres.GetBanners"
 
-	rows, err := db.pool.Query(context.Background(), "SELECT id, alias, img, redirect_url FROM banners")
+	const sql = "SELECT id, alias, img, redirect_url, addition_date FROM banners;"
+
+	banners, err := scanMultiple[types.Banner](db, sql, scanBanner)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", f, err)
 	}
-	defer rows.Close()
-
-	banners := []types.Banner{}
-	for rows.Next() {
-		tmp := types.Banner{}
-		tmpRedirectURL := pgtype.Text{}
-		if err := rows.Scan(&tmp.ID, &tmp.Alias, &tmp.Img, &tmpRedirectURL); err != nil {
-			return nil, fmt.Errorf("%s: %w", f, err)
-		}
-		if tmpRedirectURL.Valid {
-			tmp.RedirectURL = tmpRedirectURL.String
-		}
-		banners = append(banners, tmp)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("%s: %w", f, err)
-	}
-
-	fmt.Println(banners)
+	// pgx.RowToStructByPos[types.Banner](db.pool.QueryRow(context.Background(), sql))
+	// rows, err := db.pool.Query(context.Background(), sql)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("%s: %w", f, err)
+	// }
+	// banners, err := pgx.CollectRows(rows, scanBanner)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("%s: %w", f, err)
+	// }
 
 	return banners, nil
 }
 
-func (db postgres) GetCatalogParameter(id int64) types.CatalogParameter {
-	return types.CatalogParameter{}
+// func (db postgres) GetCatalogParameter(id int64) types.CatalogParameter {
+// 	return types.CatalogParameter{}
+// }
+//
+// func (db postgres) GetProductByID(id int64) types.Product {
+// 	return types.Product{}
+// }
+//
+// func (db postgres) GetProductByName(name string) types.Product {
+// 	return types.Product{}
+// }
+
+func scanMultiple[T any](db postgres, sql string, fn pgx.RowToFunc[T]) ([]T, error) {
+	rows, err := db.pool.Query(context.Background(), sql)
+	if err != nil {
+		return nil, err
+	}
+
+	var collectable []T
+	if fn == nil {
+		collectable, err = pgx.CollectRows(rows, pgx.RowToStructByPos[T]) // TODO maybe we should force caller to pass pgx.RowToStructByPos[T], but if nil - return error?
+	} else {
+		collectable, err = pgx.CollectRows(rows, fn)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return collectable, nil
 }
 
-func (db postgres) GetProductByID(id int64) types.Product {
-	return types.Product{}
-}
+// func scanCatalog(row pgx.CollectableRow) (types.Catalog, error) {
+// 	fmt.Println("WORKS???", row.FieldDescriptions())
+// 	var catalog types.Catalog
+// 	if err := row.Scan(&catalog.ID, &catalog.Alias, &catalog.Img, &catalog.RuName, &catalog.AdditionDate); err != nil {
+// 		return types.Catalog{}, err
+// 	}
+// 	return catalog, nil
+// }
 
-func (db postgres) GetProductByName(name string) types.Product {
-	return types.Product{}
+func scanBanner(row pgx.CollectableRow) (types.Banner, error) {
+	var banner types.Banner
+	var redirectURL zeronull.Text
+	if err := row.Scan(&banner.ID, &banner.Alias, &banner.Img, &redirectURL, &banner.AdditionDate); err != nil {
+		return types.Banner{}, err
+	}
+
+	banner.RedirectURL = string(redirectURL)
+
+	return banner, nil
 }

@@ -1,10 +1,13 @@
 package types
 
+import "time"
+
 type Catalog struct {
-	ID     int64
-	Alias  string
-	Img    string
-	RuName string
+	ID           int64
+	Alias        string
+	Img          string
+	RuName       string
+	AdditionDate time.Time
 }
 
 type CatalogParameter struct {
@@ -20,8 +23,9 @@ type Product struct {
 }
 
 type Banner struct {
-	ID          int64
-	Alias       string
-	Img         string
-	RedirectURL string
+	ID           int64
+	Alias        string
+	Img          string
+	RedirectURL  string
+	AdditionDate time.Time
 }

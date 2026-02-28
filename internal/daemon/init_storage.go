@@ -5,7 +5,7 @@ import (
 
 	"github.com/ulibaysya/krona/internal/config"
 	"github.com/ulibaysya/krona/internal/storage"
-	"github.com/ulibaysya/krona/internal/storage/cachebased"
+	// "github.com/ulibaysya/krona/internal/storage/cachebased"
 	"github.com/ulibaysya/krona/internal/storage/postgres"
 )
 
@@ -58,21 +58,22 @@ func newStorage(cfg config.Storage) (storage.Storage, error) {
 		}
 		return rdbms, nil
 	case "cachebased":
-		rdbms, err := newRDBMS(cfg)
-		if err != nil {
-			return nil, fmt.Errorf("%s: %w", f, err)
-		}
-		cache, err := newCache(cfg)
-		if err != nil {
-			return nil, fmt.Errorf("%s: %w", f, err)
-		}
-		strg, err := cachebased.New(rdbms, cache)
-		if err != nil {
-			return nil, fmt.Errorf("%s: %w", f, err)
-		}
-		return strg, nil
+		return nil, fmt.Errorf("TODO")
+		// rdbms, err := newRDBMS(cfg)
+		// if err != nil {
+		// 	return nil, fmt.Errorf("%s: %w", f, err)
+		// }
+		// cache, err := newCache(cfg)
+		// if err != nil {
+		// 	return nil, fmt.Errorf("%s: %w", f, err)
+		// }
+		// strg, err := cachebased.New(rdbms, cache)
+		// if err != nil {
+		// 	return nil, fmt.Errorf("%s: %w", f, err)
+		// }
+		// return strg, nil
 	default:
-		return nil, fmt.Errorf("%s: %w", f, storage.NewBadMethod(cfg.Method))
+		return nil, fmt.Errorf("%s: %w", f, storage.NewErrBadMethod(cfg.Method))
 	}
 }
 
@@ -81,7 +82,7 @@ func newRDBMS(cfg config.Storage) (storage.Storage, error) {
 	case "postgres":
 		return postgres.New(cfg.RDBMS)
 	default:
-		return nil, storage.NewBadEngine(cfg.RDBMS.Engine)
+		return nil, storage.NewErrBadEngine(cfg.RDBMS.Engine)
 	}
 }
 

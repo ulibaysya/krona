@@ -8,8 +8,14 @@ type Storage interface {
 
 type Getter interface {
 	InsertCatalog(types.Catalog) (types.Catalog, error)
+
 	GetCatalog(id int64) (types.Catalog, error)
+	GetCatalogAlias(alias string) (types.Catalog, error)
+
 	GetCatalogs() ([]types.Catalog, error)
+
+	DeleteCatalog(id int64) error
+	DeleteCatalogAlias(alias string) error
 
 	GetBanners() ([]types.Banner, error)
 

@@ -3,6 +3,7 @@ package postgres
 import (
 	"crypto/rand"
 	"os"
+	"slices"
 	"testing"
 
 	"github.com/ulibaysya/krona/internal/config"
@@ -15,30 +16,73 @@ func TestCatalogs(t *testing.T) {
 		t.Fatalf("expected new postgres database: %v", err)
 	}
 
-	// testCatalog := types.Catalog{Alias: "test_catalog", RuName: "Тестовый каталог", Img: "test_catalog.jpg"}
-	testCatalog := types.Catalog{Alias: rand.Text(), RuName: rand.Text(), Img: rand.Text()}
+	// catalogs := types.Catalog{Alias: "test_catalog", RuName: "Тестовый каталог", Img: "test_catalog.jpg"}
+	// catalogs := types.Catalog{Alias: rand.Text(), RuName: rand.Text(), Img: rand.Text()}
+	// catalogs := make([]types.Catalog, 3)
+	catalogs := make([]types.Catalog, 10)
+	for i := range catalogs {
+		catalogs[i] = types.Catalog{Alias: rand.Text(), RuName: rand.Text(), Img: rand.Text()}
+	}
 
 	tests := []struct {
 		name string
 		fn   func(t *testing.T)
 	}{
-		{"insertCatalog", func(t *testing.T) {
-			tmp, err := db.InsertCatalog(testCatalog)
+		{"InsertCatalog", func(t *testing.T) {
+			tmp, err := db.InsertCatalog(catalogs[0])
 			if err != nil {
-				t.Fatalf("expected catalog with id and addition date: %#v", err)
+				t.Fatalf("expected catalog with id and addition date: %v", err)
 			}
-			t.Logf("received catalog: %#v", tmp)
-			testCatalog = tmp
+			t.Logf("received catalog: %v", tmp)
+			catalogs[0] = tmp
 		}},
-		{"getCatalog", func(t *testing.T) {
-			tmp, err := db.GetCatalog(testCatalog.ID)
+		{"GetCatalog", func(t *testing.T) {
+			tmp, err := db.GetCatalog(catalogs[0].ID)
 			if err != nil {
-				t.Fatalf("expected catalog: %#v", err)
+				t.Fatalf("expected catalog: %v", err)
 			}
-			if tmp != testCatalog {
-				t.Fatalf("expected catalog: %#v; received catalog: %#v", testCatalog, tmp)
+			if tmp != catalogs[0] {
+				t.Fatalf("expected catalog: %#v; received catalog: %#v", catalogs, tmp)
 			}
 			t.Logf("received expected catalog: %#v", tmp)
+		}},
+		{"GetCatalogAlias", func(t *testing.T) {
+			tmp, err := db.GetCatalogAlias(catalogs[0].Alias)
+			if err != nil {
+				t.Fatalf("expected catalog: %v", err)
+			}
+			if tmp != catalogs[0] {
+				t.Fatalf("expected catalog: %#v; received catalog: %#v", catalogs, tmp)
+			}
+			t.Logf("received expected catalog: %#v", tmp)
+		}},
+		{"DeleteCatalog", func(t *testing.T) {
+			if err := db.DeleteCatalog(catalogs[0].ID); err != nil {
+				t.Fatalf("error while deleting catalog: %v", err)
+			}
+		}},
+		{"GetCatalogs", func(t *testing.T) {
+			for i := range catalogs {
+				catalogs[i], err = db.InsertCatalog(catalogs[i])
+				if err != nil {
+					t.Fatalf("error while inserting catalog: %v", err)
+				}
+			}
+			allCatalogs, err := db.GetCatalogs()
+			if err != nil {
+				t.Fatalf("expected catalog: %v", err)
+			}
+			if !slices.Equal(allCatalogs, catalogs) {
+				t.Fatalf("error while comparing slices")
+				// t.Fatalf("error while comparing slices; expected: %#v; received: %#v", catalogs, allCatalogs)
+			}
+		}},
+		{"DeleteCatalogAlias", func(t *testing.T) {
+			for _, i := range catalogs {
+				if err := db.DeleteCatalogAlias(i.Alias); err != nil {
+					t.Fatalf("error while deleting; catalog: %#v; error: %v",  i, err)
+				}
+			}
 		}},
 	}
 

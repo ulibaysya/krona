@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype/zeronull"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/ulibaysya/krona/internal/config"
+	"github.com/ulibaysya/krona/internal/storage"
 	"github.com/ulibaysya/krona/internal/storage/types"
 )
 
@@ -55,27 +56,70 @@ func (db postgres) GetCatalog(id int64) (types.Catalog, error) {
 	return catalog, nil
 }
 
+func (db postgres) GetCatalogAlias(alias string) (types.Catalog, error) {
+	const f = "internal/storage/postgres.GetCatalogAlias"
+
+	const sql = "SELECT id, alias, img, ru_name, addition_date FROM catalogs WHERE alias = $1;"
+
+	var catalog types.Catalog
+	if err := db.pool.QueryRow(context.Background(), sql, alias).Scan(&catalog.ID, &catalog.Alias, &catalog.Img, &catalog.RuName, &catalog.AdditionDate); err != nil {
+		return types.Catalog{}, fmt.Errorf("%s: %w", f, err)
+	}
+
+	return catalog, nil
+}
+
 func (db postgres) GetCatalogs() ([]types.Catalog, error) {
 	const f = "internal/storage/postgres.GetCatalogs"
 
-	const sql = "SELECT id, alias, img, ru_name, addition_date FROM catalogs;"
+	const sql = "SELECT id, alias, img, ru_name, addition_date FROM catalogs ORDER BY id;"
 
 	catalogs, err := scanMultiple[types.Catalog](db, sql, nil)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", f, err)
 	}
-	// rows, err := db.pool.Query(context.Background(), sql)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("%s: %w", f, err)
-	// }
-	// catalogs, err := pgx.CollectRows(rows, scanCatalog)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("%s: %w", f, err)
-	// }
 
 	fmt.Println(catalogs)
 
 	return catalogs, nil
+}
+
+func (db postgres) DeleteCatalog(id int64) error {
+	const f = "internal/storage/postgres.DeleteCatalog"
+
+	const sql = "DELETE FROM catalogs WHERE id = $1;"
+
+	res, err := db.pool.Exec(context.Background(), sql, id)
+	if err != nil {
+		return fmt.Errorf("%s: %w", f, err)
+	}
+
+	if aff := res.RowsAffected(); aff == 0 {
+		return fmt.Errorf("%s: %w", f, storage.NewErrAff("none catalog is deleted"))
+	} else if aff > 1 {
+		return fmt.Errorf("%s: %w", f, storage.NewErrAff("several catalogs are deleted"))
+	}
+
+	return nil
+}
+
+func (db postgres) DeleteCatalogAlias(alias string) error {
+	const f = "internal/storage/postgres.DeleteCatalogAlias"
+
+	const sql = "DELETE FROM catalogs WHERE alias = $1;"
+
+	res, err := db.pool.Exec(context.Background(), sql, alias)
+	if err != nil {
+		return fmt.Errorf("%s: %w", f, err)
+	}
+
+	if aff := res.RowsAffected(); aff == 0 {
+		return fmt.Errorf("%s: %w", f, storage.NewErrAff("none catalog is deleted"))
+	} else if aff > 1 {
+		return fmt.Errorf("%s: %w", f, storage.NewErrAff("several catalogs are deleted"))
+	}
+
+	return nil
 }
 
 func (db postgres) GetBanners() ([]types.Banner, error) {
@@ -87,30 +131,9 @@ func (db postgres) GetBanners() ([]types.Banner, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", f, err)
 	}
-	// pgx.RowToStructByPos[types.Banner](db.pool.QueryRow(context.Background(), sql))
-	// rows, err := db.pool.Query(context.Background(), sql)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("%s: %w", f, err)
-	// }
-	// banners, err := pgx.CollectRows(rows, scanBanner)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("%s: %w", f, err)
-	// }
 
 	return banners, nil
 }
-
-// func (db postgres) GetCatalogParameter(id int64) types.CatalogParameter {
-// 	return types.CatalogParameter{}
-// }
-//
-// func (db postgres) GetProductByID(id int64) types.Product {
-// 	return types.Product{}
-// }
-//
-// func (db postgres) GetProductByName(name string) types.Product {
-// 	return types.Product{}
-// }
 
 func scanMultiple[T any](db postgres, sql string, fn pgx.RowToFunc[T]) ([]T, error) {
 	rows, err := db.pool.Query(context.Background(), sql)
@@ -118,17 +141,17 @@ func scanMultiple[T any](db postgres, sql string, fn pgx.RowToFunc[T]) ([]T, err
 		return nil, err
 	}
 
-	var collectable []T
+	var objects []T
 	if fn == nil {
-		collectable, err = pgx.CollectRows(rows, pgx.RowToStructByPos[T]) // TODO maybe we should force caller to pass pgx.RowToStructByPos[T], but if nil - return error?
+		objects, err = pgx.CollectRows(rows, pgx.RowToStructByPos[T]) // TODO maybe we should force caller to pass pgx.RowToStructByPos[T], but if nil - return error?
 	} else {
-		collectable, err = pgx.CollectRows(rows, fn)
+		objects, err = pgx.CollectRows(rows, fn)
 	}
 	if err != nil {
 		return nil, err
 	}
 
-	return collectable, nil
+	return objects, nil
 }
 
 // func scanCatalog(row pgx.CollectableRow) (types.Catalog, error) {

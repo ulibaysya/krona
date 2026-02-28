@@ -73,7 +73,7 @@ func newStorage(cfg config.Storage) (storage.Storage, error) {
 		// }
 		// return strg, nil
 	default:
-		return nil, fmt.Errorf("%s: %w", f, storage.NewErrBadMethod(cfg.Method))
+		return nil, fmt.Errorf("%s: %w", f, storage.NewErrBadType(cfg.Method))
 	}
 }
 

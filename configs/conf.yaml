@@ -10,12 +10,12 @@ service:
   templates_path: /home/ulibaysya/projects/krona/web/templates
   static:
     serve: true
-    path: /home/ulibaysya/projects/krona/tests/static
+    path: /home/ulibaysya/projects/krona/tests/testdata/static
   admin_panel:
     enabled: false
 
 storage:
-  method: rdbms
+  type: rdbms
   rdbms:
     engine: "postgres"
     connstr: "dbname=kronadb user=krona"

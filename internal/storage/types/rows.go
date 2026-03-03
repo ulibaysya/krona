@@ -2,7 +2,7 @@ package types
 
 import "time"
 
-type Catalog struct {
+type CatalogRow struct {
 	ID           int64
 	Alias        string
 	Img          string
@@ -10,22 +10,18 @@ type Catalog struct {
 	AdditionDate time.Time
 }
 
-type CatalogParameter struct {
-	ID             int32
-	Key, RuKey     string
-	Value, RuValue string
-	CatalogID      int32
-}
-
-type Product struct {
-	ID           int32
-	Name, RuName string
-}
-
-type Banner struct {
+type BannerRow struct {
 	ID           int64
 	Alias        string
 	Img          string
 	RedirectURL  string
 	AdditionDate time.Time
+}
+
+type ParameterRow struct {
+	ID             int64
+	Key, Value     string
+	RuKey, RuValue string
+	CatalogsID     int64
+	AdditionDate   time.Time
 }

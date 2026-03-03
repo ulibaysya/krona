@@ -5,6 +5,7 @@ go 1.25.5
 require (
 	github.com/go-chi/chi/v5 v5.2.5
 	github.com/goccy/go-yaml v1.19.2
+	github.com/jackc/pgerrcode v0.0.0-20250907135507-afb5586c32a6
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/rs/zerolog v1.34.0
 )

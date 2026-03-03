@@ -48,49 +48,63 @@ import (
 // }
 
 func newStorage(cfg config.Storage) (storage.Storage, error) {
-	const f = "github.com/ulibaysya/krona/internal/storage.newStorage"
-
-	switch cfg.Method {
+	switch cfg.Type {
 	case "rdbms":
-		rdbms, err := newRDBMS(cfg)
-		if err != nil {
-			return nil, err
-		}
-		return rdbms, nil
 	case "cachebased":
-		return nil, fmt.Errorf("TODO")
-		// rdbms, err := newRDBMS(cfg)
-		// if err != nil {
-		// 	return nil, fmt.Errorf("%s: %w", f, err)
-		// }
-		// cache, err := newCache(cfg)
-		// if err != nil {
-		// 	return nil, fmt.Errorf("%s: %w", f, err)
-		// }
-		// strg, err := cachebased.New(rdbms, cache)
-		// if err != nil {
-		// 	return nil, fmt.Errorf("%s: %w", f, err)
-		// }
-		// return strg, nil
+		return nil, fmt.Errorf("cachebased type is not yet implemented, use rdbms")
 	default:
-		return nil, fmt.Errorf("%s: %w", f, storage.NewErrBadType(cfg.Method))
+		return nil, fmt.Errorf("wrong storage type: %s", cfg.Type)
 	}
+
+	strg, err := newRDBMS(cfg)
+	if err != nil {
+		return nil, fmt.Errorf("initializing RDBMS: %w", err)
+	}
+
+	return strg, nil
 }
+// func newStorage(cfg config.Storage) (storage.Storage, error) {
+// 	switch cfg.Type {
+// 	case "rdbms":
+// 		rdbms, err := newRDBMS(cfg)
+// 		if err != nil {
+// 			return nil, fmt.Errorf("initializing RDBMS", err)
+// 		}
+// 		return rdbms, nil
+// 	case "cachebased":
+// 		// rdbms, err := newRDBMS(cfg)
+// 		// if err != nil {
+// 		// 	return nil, fmt.Errorf("%s: %w", f, err)
+// 		// }
+// 		// cache, err := newCache(cfg)
+// 		// if err != nil {
+// 		// 	return nil, fmt.Errorf("%s: %w", f, err)
+// 		// }
+// 		// strg, err := cachebased.New(rdbms, cache)
+// 		// if err != nil {
+// 		// 	return nil, fmt.Errorf("%s: %w", f, err)
+// 		// }
+// 		// return strg, nil
+// 	default:
+// 		// return nil, fmt.Errorf("%s: %w", f, storage.NewErrBadType(cfg.Method))
+// 		return nil, fmt.Errorf("wrong storage type: %s", cfg.Type)
+// 	}
+// }
 
 func newRDBMS(cfg config.Storage) (storage.Storage, error) {
 	switch cfg.RDBMS.Engine {
 	case "postgres":
 		return postgres.New(cfg.RDBMS)
 	default:
-		return nil, storage.NewErrBadEngine(cfg.RDBMS.Engine)
+		return nil, fmt.Errorf("wrong RDBMS engine: %s", cfg.RDBMS.Engine)
 	}
 }
 
-func newCache(cfg config.Storage) (storage.Storage, error) {
-	switch cfg.Cache.Engine {
-	// case "valkey":
-	// return postgres.New(cfg.RDBMS)
-	default:
-		return nil, fmt.Errorf(`cache is not yet implemented. use "rdbms" method`)
-	}
-}
+// func newCache(cfg config.Storage) (storage.Storage, error) {
+// 	switch cfg.Cache.Engine {
+// 	// case "valkey":
+// 	// return postgres.New(cfg.RDBMS)
+// 	default:
+// 		return nil, fmt.Errorf(`cache is not yet implemented. use "rdbms" method`)
+// 	}
+// }

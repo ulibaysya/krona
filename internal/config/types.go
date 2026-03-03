@@ -23,9 +23,9 @@ type Server struct {
 }
 
 type Storage struct {
-	Method string `yaml:"method"`
-	Cache  Cache  `yaml:"cache"`
-	RDBMS  RDBMS  `yaml:"rdbms"`
+	Type  string `yaml:"type"`
+	Cache Cache  `yaml:"cache"`
+	RDBMS RDBMS  `yaml:"rdbms"`
 }
 
 type RDBMS struct {

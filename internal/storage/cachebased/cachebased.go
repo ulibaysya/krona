@@ -26,19 +26,19 @@ func New(rdbms, cache storage.Storage) (cachebased, error) {
 	return cachebased{rdbms: rdbms, cache: cache}, nil
 }
 
-func (db cachebased) InsertCatalog(types.Catalog) (types.Catalog, error) {
-	return types.Catalog{}, nil
+func (db cachebased) InsertCatalog(types.CatalogRow) (types.CatalogRow, error) {
+	return types.CatalogRow{}, nil
 }
 
-func (db cachebased) GetCatalog(id int64) (types.Catalog, error) {
-	return types.Catalog{}, nil
+func (db cachebased) GetCatalog(id int64) (types.CatalogRow, error) {
+	return types.CatalogRow{}, nil
 }
 
-func (db cachebased) GetCatalogs() ([]types.Catalog, error) {
+func (db cachebased) GetCatalogs() ([]types.CatalogRow, error) {
 	return nil, nil
 }
 
-func (db cachebased) GetBanners() ([]types.Banner, error) {
+func (db cachebased) GetBanners() ([]types.BannerRow, error) {
 	return nil, nil
 }
 

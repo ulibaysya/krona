@@ -3,23 +3,29 @@ package storage
 import "github.com/ulibaysya/krona/internal/storage/types"
 
 type Storage interface {
-	Getter
+	Catalogs
+	Banners
+	Parameters
 }
 
-type Getter interface {
-	InsertCatalog(types.Catalog) (types.Catalog, error)
+type Catalogs interface {
+	AddCatalogs(catalogs []types.CatalogRow) ([]types.CatalogRow, error) // TODO change to AddCatalogs and do the same as in AddParameters
 
-	GetCatalog(id int64) (types.Catalog, error)
-	GetCatalogAlias(alias string) (types.Catalog, error)
+	GetCatalogs(id []int64) ([]types.CatalogRow, error)
+	GetCatalogsAliases(aliases []string) ([]types.CatalogRow, error)
 
-	GetCatalogs() ([]types.Catalog, error)
+	GetAllCatalogs() ([]types.CatalogRow, error)
 
-	DeleteCatalog(id int64) error
-	DeleteCatalogAlias(alias string) error
+	DelCatalogs(id []int64) error
+	DelCatalogsAliases(alias []string) error
+}
 
-	GetBanners() ([]types.Banner, error)
+type Banners interface {
+	GetAllBanners() ([]types.BannerRow, error)
+}
 
-	// GetCatalogParameter(id int64) types.CatalogParameter
-	// GetProductByID(id int64) types.Product
-	// GetProductByName(name string) types.Product
+type Parameters interface {
+	AddParameters(parameters []types.ParameterRow) ([]types.ParameterRow, error)
+
+	GetAllProductParameters() ([]types.CatalogParameters, error)
 }

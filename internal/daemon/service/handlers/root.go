@@ -12,8 +12,8 @@ import (
 func GetRoot(strg storage.Storage, tmpl *template.Template) http.HandlerFunc {
 	type templateData struct {
 		Head
-		Catalogs []types.Catalog
-		Banners  []types.Banner
+		Catalogs []types.CatalogRow
+		Banners  []types.BannerRow
 	}
 
 	const title = `Мебель по самым низким ценам`
@@ -27,14 +27,14 @@ func GetRoot(strg storage.Storage, tmpl *template.Template) http.HandlerFunc {
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		catalogs, err := strg.GetCatalogs()
+		catalogs, err := strg.GetAllCatalogs()
 		if err != nil {
 			fmt.Println(err)
 			HandleInternalServerError(w, r)
 			return
 		}
 
-		banners, err := strg.GetBanners()
+		banners, err := strg.GetAllBanners()
 		if err != nil {
 			fmt.Println(err)
 			HandleInternalServerError(w, r)
